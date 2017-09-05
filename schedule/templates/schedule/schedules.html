@@ -1,0 +1,79 @@
+{% extends 'schedule/base.html' %}
+{% load staticfiles %}
+{% load format_time %}
+
+{% block styles %}
+<link rel="stylesheet" type="text/css" href="{% static 'schedule/styles.css' %}">
+{% endblock %}
+
+
+{% block content %}
+  <div class="container">
+    <div class="card-columns">
+      {% for episode in schedule.episodes %}
+
+        <div class="card">
+          <div class="card-body">
+            <div class="d-flex flex-wrap align-items-center justify-content-between">
+              <h4 class="card-title">{{ episode.show.name }}</h4>
+              <time class="card-title" datetime="{{ episode.airtime }}">
+                {{ episode.airtime|time_12 }}
+              </time>
+            </div>
+            <div class="d-flex flex-wrap justify-content-between">
+              <h6 class="card-subtitle mb-2 text-muted">Episode: {{ episode.name }}</h6>
+              <h6 class="card-subtitle mb-2 text-muted">Type: {{ episode.show.type }}</h6>
+              <h6 class="card-subtitle mb-2 text-muted">Network: {{ episode.show.network.name }}</h6>
+            </div>
+            <div class="card-text episode-summary">
+              {% if episode.summary %}
+                {{ episode.summary|safe }}
+              {% else %}
+                <p>No summary entered.</p>
+              {% endif %}
+            </div>
+            <div class="d-flex justify-content-between">
+              <button id="show-{{ episode.show.id }}" class="follow-btn btn btn-primary">Follow</button>
+              <a href="#" class="btn btn-info">View show</a>
+            </div>
+          </div>
+        </div>
+
+      {% endfor %}
+    </div>
+  </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+var token = "{{ csrf_token }}";
+function csrfSafeMethod(method) {
+    // these HTTP methods do not require CSRF protection
+    return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+}
+$.ajaxSetup({
+    beforeSend: function(xhr, settings) {
+        if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+            xhr.setRequestHeader("X-CSRFToken", token);
+        }
+    }
+});
+
+  $('.follow-btn').click(function() {
+    var self = $(this);
+    var show = this.id.split('-')[1];
+    $.post(
+      '/shows/follow/', { show: show }
+      )
+      .done(function(results) {
+        console.log(results);
+        if (results.following) {
+          self.addClass('btn-success').removeClass('btn-primary')
+        } else {
+          self.addClass('btn-primary').removeClass('btn-success')
+        }
+      })
+      .fail(function(results) {console.log(results)})
+  });
+</script>
+{% endblock %}
