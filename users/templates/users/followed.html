@@ -3,5 +3,30 @@
 
 {% block content %}
 
-  <div class="container">followed shows here</div>
+  <div class="container">
+  <div>
+    <a href="{% url 'users:followed' %}">Today</a>
+    <div class="input-group d-flex justify-content-center">
+      <span class="input-group-btn">
+        <a class="btn btn-info" href="{% url 'users:followed_day' prev_day %}">Previous day</a>
+      </span>
+      <label for="current-day" aria-hidden="true" hidden>Current day</label>
+      <input id="current-day" type="text" readonly value="{{ current_day }}" class="text-center form-control-plaintext" />
+      <span class="input-group-btn">
+        <a class="btn btn-info" href="{% url 'users:followed_day' next_day %}">Next day</a>
+      </span>
+    </div>
+  </div>
+  {% if shows %}
+    <ul class="list-group">
+    {% for show in shows %}
+      <li class="list-group-item">
+        {{ show.show_name }}
+      </li>
+    {% endfor %}
+    </ul>
+  {% else %}
+  <div>No shows today!</div>
+  {% endif %}
+  </div>
 {% endblock %}

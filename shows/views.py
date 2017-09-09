@@ -1,7 +1,6 @@
 from django.shortcuts import render, Http404
 from django.http import JsonResponse
 from django.views.generic import TemplateView
-from django.utils.decorators import method_decorator
 from django.contrib.auth.decorators import login_required
 
 from pytv import Show
@@ -43,13 +42,15 @@ def follow_shows(request):
             except ApiError:
                 raise Http404
             else:
-                FollowedShows.objects.create(
+                FollowedShows.objects.get_or_create(
                     user=person,
                     show_id=show.show_id,
-                    show_name=show.name,
-                    network=show.network['name'],
-                    summary=show.summary,
-                    air_time=show.schedule['time'],
-                    air_days=",".join(show.schedule['days'])
+                    defaults={
+                        "show_name": show.name,
+                        "network": show.network['name'],
+                        "summary": show.summary,
+                        "air_time": show.schedule['time'],
+                        'air_days': ",".join(show.schedule['days']).lower()
+                    }
                 )
                 return JsonResponse({"following": True})

@@ -22,7 +22,7 @@ urlpatterns = [
     url(r'^', include('users.urls')),
     url(r'^shows/', include('shows.urls')),
     url(r'^schedule/', include('schedule.urls')),
-    url(r'^login/', auth_views.login),
-    url(r'^logout/$', auth_views.logout),
+    url(r'^login/', auth_views.login, name='login'),
+    url(r'^logout/$', auth_views.logout, name='logout'),
     url(r'^admin/', admin.site.urls),
 ]

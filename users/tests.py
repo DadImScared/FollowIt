@@ -1,7 +1,28 @@
-from django.test import TestCase
-from .models import Person, FollowedShows
 
+import datetime
+import random
+from django.test import TestCase
+from django.urls import reverse
+from django.core import mail
+from .models import Person, FollowedShows
+from pytv import Schedule
+from email_users import mail_users
 # Create your tests here.
+
+
+def create_shows(user, schedule=Schedule()):
+    """creates test followed shows"""
+    days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday']
+    for episode in schedule.episodes:
+        FollowedShows.objects.get_or_create(
+            user=user,
+            show_id=episode['show']['id'],
+            show_name=episode['show']['name'],
+            network=episode['show']['network']['name'],
+            air_time=episode['airtime'],
+            air_days=','.join(episode['show']['schedule']['days']).lower(),
+            summary=episode['summary'] or 'no summary'
+        )
 
 
 class PersonTests(TestCase):
@@ -21,3 +42,50 @@ class PersonTests(TestCase):
             network='network here'
         )
         self.assertTrue(person.is_following(show.show_id))
+
+
+class FollowedShowsTests(TestCase):
+    def setUp(self):
+        self.user = Person.objects.create_user(username='foo', password='bar', email='foo@test.com')
+        self.user.save()
+        self.user2 = Person.objects.create_user(username='bar', password='foo', email='bar@test.com')
+        time = datetime.datetime.now()
+        self.schedule = Schedule(date=time.strftime('%Y-%m-%d'))
+        create_shows(self.user, self.schedule)
+        create_shows(self.user2, self.schedule)
+        self.episode_list = [episode['show']['id'] for episode in self.schedule.episodes]
+        self.shows = FollowedShows.objects.filter(show_id__in=self.episode_list).order_by('-air_time')
+
+    def test_email_users_followed_shows_on_specific_day(self):
+        mail_users()
+        self.assertEqual(2, len(mail.outbox))
+        print(mail.outbox[1].body)
+
+
+class FollowedShowsViewTests(TestCase):
+    def setUp(self):
+        self.user = Person.objects.create_user(username='foo', password='bar')
+        self.user.save()
+        create_shows(self.user)
+
+    def test_followed_shows_view(self):
+        days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday' 'sunday']
+        response = self.client.login(username='foo', password='bar')
+        response = self.client.get(reverse('users:followed'))
+        self.assertEqual(200, response.status_code)
+        self.assertTemplateUsed(response, template_name='users/followed.html')
+        self.assertTrue(response.context['shows'])
+        shows = response.context['shows']
+        for show in shows:
+            print(show.air_days)
+            self.assertTrue(show.air_days in days)
+
+    def test_follow_shows_with_bad_day(self):
+        """follow_shows view should return an empty list if no shows air on that day"""
+        day = 'sunday'
+        response = self.client.login(username='foo', password='bar')
+        response = self.client.get(reverse('users:followed_day', args=(day,)))
+        self.assertEqual(200, response.status_code)
+        self.assertTemplateUsed(response, template_name='users/followed.html')
+        print(response.context['shows'])
+        self.assertFalse(response.context['shows'])

@@ -25,10 +25,23 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = config.SECRET_KEY
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = config.DEBUG
 
 ALLOWED_HOSTS = []
 
+# Email settings
+DEV_BACKEND = 'django.core.mail.backends.locmem.EmailBackend'
+PROD_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_BACKEND = DEV_BACKEND if DEBUG else PROD_BACKEND
+
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 465
+EMAIL_HOST_USER = config.MAIL_USER
+EMAIL_HOST_PASSWORD = config.MAIL_PASS
+EMAIL_USE_TLS = False
+EMAIL_SSL = True
+
+# Login settings
 LOGIN_URL = '/login/'
 LOGIN_REDIRECT_URL = '/schedule'
 LOGOUT_REDIRECT_URL = '/schedule'
@@ -44,7 +57,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'schedule.apps.ScheduleConfig',
     'shows.apps.ShowsConfig',
-    'users.apps.UsersConfig'
+    'users.apps.UsersConfig',
 ]
 
 MIDDLEWARE = [

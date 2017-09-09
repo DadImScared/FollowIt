@@ -1,6 +1,7 @@
 {% extends 'schedule/base.html' %}
 {% load staticfiles %}
 {% load format_time %}
+{% load get_person %}
 
 {% block styles %}
 <link rel="stylesheet" type="text/css" href="{% static 'schedule/styles.css' %}">
@@ -9,6 +10,30 @@
 
 {% block content %}
   <div class="container">
+    <a href="{% url 'schedule:schedules' %}">Today</a>
+    <div class="input-group">
+      <span class="input-group-btn">
+        <a class="btn btn-info" href="{% url 'schedule:schedules_by_date' prev_week %}" type="button">
+          <i class="fa fa-fast-backward" aria-hidden="true"></i>
+        </a>
+      </span>
+      <span class="input-group-btn">
+        <a href="{% url 'schedule:schedules_by_date' prev_day %}" class="btn btn-info" type="button">
+          <i class="fa fa-arrow-left" aria-hidden="true"></i>
+        </a>
+      </span>
+      <input type="text" class="form-control-plaintext" readonly value="{{ current_day }}" aria-label="Product name">
+      <span class="input-group-btn">
+        <a href="{% url 'schedule:schedules_by_date' next_day %}" class="btn btn-info" type="button">
+          <i class="fa fa-arrow-right" aria-hidden="true"></i>
+        </a>
+      </span>
+      <span class="input-group-btn">
+        <a href="{% url 'schedule:schedules_by_date' next_week %}" class="btn btn-info" type="button">
+          <i class="fa fa-fast-forward" aria-hidden="true"></i>
+        </a>
+      </span>
+    </div>
     <div class="card-columns">
       {% for episode in schedule.episodes %}
 
@@ -33,7 +58,15 @@
               {% endif %}
             </div>
             <div class="d-flex justify-content-between">
-              <button id="show-{{ episode.show.id }}" class="follow-btn btn btn-primary">Follow</button>
+              {% if user.is_authenticated %}
+                {% if user|is_following:episode.show.id %}
+                  <button id="show-{{ episode.show.id }}" class="follow-btn btn btn-success">Following</button>
+                {% else %}
+                  <button id="show-{{ episode.show.id }}" class="follow-btn btn btn-primary">Follow</button>
+                {% endif %}
+              {% else %}
+                <button id="show-{{ episode.show.id }}" class="follow-btn btn btn-primary">Follow</button>
+              {% endif %}
               <a href="#" class="btn btn-info">View show</a>
             </div>
           </div>
@@ -66,11 +99,12 @@ $.ajaxSetup({
       '/shows/follow/', { show: show }
       )
       .done(function(results) {
-        console.log(results);
         if (results.following) {
-          self.addClass('btn-success').removeClass('btn-primary')
+          self.addClass('btn-success').removeClass('btn-primary');
+          self.text('following')
         } else {
-          self.addClass('btn-primary').removeClass('btn-success')
+          self.addClass('btn-primary').removeClass('btn-success');
+          self.text('Follow');
         }
       })
       .fail(function(results) {console.log(results)})
