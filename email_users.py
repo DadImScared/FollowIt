@@ -30,7 +30,7 @@ def mail_users():
             messages[show.user.email] = [show]
     for email, show_list in messages.items():
         mail.send_mail(
-            subject='Todays shows',
+            subject="Today's shows",
             from_email=config.MAIL_USER,
             recipient_list=[email],
             message='{}'.format(

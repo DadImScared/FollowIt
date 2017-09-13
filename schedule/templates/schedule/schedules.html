@@ -67,7 +67,7 @@
               {% else %}
                 <button id="show-{{ episode.show.id }}" class="follow-btn btn btn-primary">Follow</button>
               {% endif %}
-              <a href="#" class="btn btn-info">View show</a>
+              <a href="{% url 'shows:show' episode.show.id %}" class="btn btn-info">View show</a>
             </div>
           </div>
         </div>

@@ -14,5 +14,6 @@ urlpatterns = [
         success_url='/schedule',
     )),
     url(r'^followed/$', views.followed_shows, name='followed'),
-    url(r'^followed/(?P<air_day>[a-zA-Z]+)', views.followed_shows, name='followed_day')
+    url(r'^followed/(?P<air_day>[a-zA-Z]+)', views.followed_shows, name='followed_day'),
+
 ]

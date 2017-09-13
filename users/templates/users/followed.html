@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
-
+{% load format_time %}
+{% load get_person %}
 
 {% block content %}
 
@@ -18,15 +19,69 @@
     </div>
   </div>
   {% if shows %}
-    <ul class="list-group">
-    {% for show in shows %}
-      <li class="list-group-item">
-        {{ show.show_name }}
-      </li>
-    {% endfor %}
-    </ul>
+    <!-- div tags used instead of ul/li because adding row to the <ul> doesn't work maybe I'm doing it wrong -->
+    <div class="list-group">
+      <div class="row">
+        {% for show in shows %}
+          <div class="list-group-item d-flex flex-wrap justify-content-between col-lg-6 col-12">
+            <div class="align-self-center order-2"><a href="{% url 'shows:show' show.show_id %}">{{ show.show_name }}</a></div>
+            <div class="align-self-center order-3">
+              <i class="fa fa-clock-o" aria-hidden="true"></i>
+              <time datetime="{{ show.air_time }}">{{ show.air_time|time }}</time>
+            </div>
+            <div class="align-self-center order-1">
+              {% if show.status|lower != 'ended' %}
+                {% if user|is_following:show.show_id %}
+                  <button id="show-{{ show.show_id }}" class="order-1 follow-btn btn btn-success">Following</button>
+                {% else %}
+                  <button id="show-{{ show.show_id }}" class="order-1 follow-btn btn btn-primary">Follow</button>
+                {% endif %}
+              {% else %}
+                <span class="text-center">Status: {{ show.status }}</span>
+              {% endif %}
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
   {% else %}
   <div>No shows today!</div>
   {% endif %}
   </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+var token = "{{ csrf_token }}";
+function csrfSafeMethod(method) {
+    // these HTTP methods do not require CSRF protection
+    return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+}
+$.ajaxSetup({
+    beforeSend: function(xhr, settings) {
+        if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+            xhr.setRequestHeader("X-CSRFToken", token);
+        }
+    }
+});
+
+  $('.follow-btn').click(function() {
+    var self = $(this);
+    var show = this.id.split('-')[1];
+    $.post(
+      '/shows/follow/', { show: show }
+      )
+      .done(function(results) {
+        console.log(results);
+        if (results.following) {
+          self.addClass('btn-success').removeClass('btn-primary');
+          self.text('following')
+        } else {
+          self.addClass('btn-primary').removeClass('btn-success');
+          self.text('Follow');
+        }
+      })
+      .fail(function(results) {console.log(results)})
+  });
+</script>
 {% endblock %}

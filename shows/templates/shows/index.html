@@ -1,7 +1,82 @@
 {% extends 'base.html' %}
+{% load staticfiles %}
+{% load format_time %}
+{% load get_person %}
 
 {% block content %}
   <div class="container">
-    {{ show.name }}
+    <div class="row">
+
+      <div class="col-auto">
+        <div class="card">
+          <img src="{{ show.image.medium }}" alt="{{ show.name }}" class="card-img-top">
+
+          <div class="card-footer">
+
+            {% include 'shows/followbutton.html' %}
+          </div>
+        </div>
+      </div>
+
+      <div class="col-12 d-flex justify-content-around flex-column col-md-6">
+        <div class="d-flex flex-wrap justify-content-between">
+          <!-- Show air time -->
+          <span>
+            <i class="fa fa-clock-o" aria-hidden="true"></i>
+            <time datetime="{{ show.schedule.time }}">{{ show.schedule.time|time_12 }}</time>
+          </span>
+
+          <span>
+            Premiered: <time datetime="{{ show.premiered }}">{{ show.premiered }}</time>
+          </span>
+          <!-- Network name  -->
+          <div><i class="fa fa-television" aria-hidden="true"></i> {{ show.network.name }}</div>
+
+          <div>Days: {{ show.schedule.days|join:', ' }}</div>
+
+        </div>
+        <div>Summary: {{ show.summary|safe }}</div>
+      </div>
+
+    </div>
+
+
+
   </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+var token = "{{ csrf_token }}";
+function csrfSafeMethod(method) {
+    // these HTTP methods do not require CSRF protection
+    return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+}
+$.ajaxSetup({
+    beforeSend: function(xhr, settings) {
+        if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+            xhr.setRequestHeader("X-CSRFToken", token);
+        }
+    }
+});
+
+  $('.follow-btn').click(function() {
+    var self = $(this);
+    var show = this.id.split('-')[1];
+    $.post(
+      '/shows/follow/', { show: show }
+      )
+      .done(function(results) {
+        console.log(results);
+        if (results.following) {
+          self.addClass('btn-success').removeClass('btn-primary');
+          self.text('following')
+        } else {
+          self.addClass('btn-primary').removeClass('btn-success');
+          self.text('Follow');
+        }
+      })
+      .fail(function(results) {console.log(results)})
+  });
+</script>
 {% endblock %}

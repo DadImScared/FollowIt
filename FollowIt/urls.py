@@ -24,5 +24,6 @@ urlpatterns = [
     url(r'^schedule/', include('schedule.urls')),
     url(r'^login/', auth_views.login, name='login'),
     url(r'^logout/$', auth_views.logout, name='logout'),
+    url('^', include('django.contrib.auth.urls')),
     url(r'^admin/', admin.site.urls),
 ]
