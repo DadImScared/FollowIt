@@ -80,6 +80,7 @@
 {% endblock %}
 
 {% block scripts %}
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.4/lodash.js"></script>
 <script>
 var token = "{{ csrf_token }}";
 function csrfSafeMethod(method) {
@@ -111,18 +112,22 @@ $.ajaxSetup({
       })
       .fail(function(results) {console.log(results)})
   });
-
-  var filterInput = $('#sched-filter');
-  var cards = $('.card');
-  filterInput.keyup(function(e) {
-    cards.each(function(i, obj) {
-      var $this = $(this);
-      if ($this.find('.card-title').text().toLowerCase().includes(e.target.value.toLowerCase())) {
-        $this.css('display', 'inline-block')
+  const filterInput = $('#sched-filter');
+  const cards = $('.card');
+  const filterCards = (e) => {
+    cards.each((i, obj) => {
+      const element = $(obj);
+      if (element.find('.card-title').text().toLowerCase().includes(e.target.value.toLowerCase())) {
+        element.css('display', 'inline-block')
       } else {
-        $this.css('display', 'none');
+        element.css('display', 'none');
       }
     });
-  });
+  };
+
+
+filterInput.keyup(function(e) {
+  _.debounce(filterCards(e), 500)
+});
 </script>
 {% endblock %}
