@@ -27,13 +27,12 @@ SECRET_KEY = config.SECRET_KEY
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config.DEBUG
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['followit.pythonanywhere.com']
 
 # Email settings
-DEV_BACKEND = 'django.core.mail.backends.locmem.EmailBackend'
+DEV_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 PROD_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_BACKEND = DEV_BACKEND if DEBUG else PROD_BACKEND
-
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 465
 EMAIL_HOST_USER = config.MAIL_USER

@@ -21,7 +21,9 @@ def mail_users():
     time = datetime.datetime.now()
     schedule = Schedule(date=time.strftime('%Y-%m-%d'))
     episode_list = [episode['show']['id'] for episode in schedule.episodes]
-    shows = FollowedShows.objects.filter(show_id__in=episode_list).order_by('-air_time')
+    shows = FollowedShows.objects.filter(show_id__in=episode_list,
+                                         user__profile__email_confirmed=True
+                                         ).order_by('-air_time')
     messages = {}
     for show in shows:
         if show.user.email in messages.keys():

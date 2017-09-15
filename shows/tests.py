@@ -2,7 +2,7 @@ from django.test import TestCase
 from django.urls import reverse
 import json
 
-from users.models import Person
+from users.models import Person, Profile
 
 # Create your tests here.
 
@@ -11,6 +11,7 @@ class ToggleFollowingTest(TestCase):
     def setUp(self):
         self.user = Person.objects.create_user(username='foo', password='bar')
         self.user.save()
+        Profile.objects.create(user=self.user)
 
     def test_toggle_following(self):
         """toggle_following() should follow or un follow a show"""
