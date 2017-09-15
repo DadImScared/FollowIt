@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <div class="container">
+    <h1>FollowIt</h1>
+    <p>A website to follow running TV shows and get a daily email of which episodes are airing</p>
+    <p>
+      To get started click <a href="{% url 'users:register' %}">here</a>  to register.
+      Already have an account? Log in <a href="{% url 'login' %}">here</a>
+    </p>
+  </div>
+{% endblock %}

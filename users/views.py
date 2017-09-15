@@ -86,3 +86,7 @@ def activate(request, uidb64, token):
         return redirect('schedule:schedules')
     else:
         return render(request, 'users/account_activation_invalid.html')
+
+
+def home_page(request):
+    return render(request, 'home/index.html')

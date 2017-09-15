@@ -8,6 +8,7 @@ from . import views
 
 app_name = 'users'
 urlpatterns = [
+    url(r'^$', views.home_page, name='home_page'),
     url(r'^register/$', views.signup, name='register'),
     url(r'^followed/$', views.followed_shows, name='followed'),
     url(r'^followed/(?P<air_day>[a-zA-Z]+)/$', views.followed_shows, name='followed_day'),
