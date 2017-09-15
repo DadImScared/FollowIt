@@ -114,7 +114,7 @@ $.ajaxSetup({
   });
   const filterInput = $('#sched-filter');
   const cards = $('.card');
-  const filterCards = (e) => {
+  const filterCards = function(e) {
     cards.each((i, obj) => {
       const element = $(obj);
       if (element.find('.card-title').text().toLowerCase().includes(e.target.value.toLowerCase())) {
@@ -126,8 +126,6 @@ $.ajaxSetup({
   };
 
 
-filterInput.keyup(function(e) {
-  _.debounce(filterCards(e), 500)
-});
+filterInput.keyup(_.debounce(filterCards, 500));
 </script>
 {% endblock %}
