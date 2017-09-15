@@ -10,6 +10,8 @@
 
 {% block content %}
   <div class="container">
+    <Label for="sched-filter" hidden aria-hidden="True">Filter by name</Label>
+    <input id="sched-filter" class="form-control" placeholder="Filter by name" />
     <a href="{% url 'schedule:schedules' %}">Today</a>
     <div class="input-group">
       <span class="input-group-btn">
@@ -41,7 +43,7 @@
           <div class="card-body">
             <div class="d-flex flex-wrap align-items-center justify-content-between">
               <h4 class="card-title">{{ episode.show.name }}</h4>
-              <time class="card-title" datetime="{{ episode.airtime }}">
+              <time datetime="{{ episode.airtime }}">
                 {{ episode.airtime|time_12 }}
               </time>
             </div>
@@ -108,6 +110,19 @@ $.ajaxSetup({
         }
       })
       .fail(function(results) {console.log(results)})
+  });
+
+  var filterInput = $('#sched-filter');
+  var cards = $('.card');
+  filterInput.keyup(function(e) {
+    cards.each(function(i, obj) {
+      var $this = $(this);
+      if ($this.find('.card-title').text().toLowerCase().includes(e.target.value.toLowerCase())) {
+        $this.css('display', 'inline-block')
+      } else {
+        $this.css('display', 'none');
+      }
+    });
   });
 </script>
 {% endblock %}
