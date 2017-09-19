@@ -14,7 +14,7 @@
     <input id="sched-filter" class="form-control" placeholder="Filter by name" />
     <a href="{% url 'schedule:schedules' %}">Today</a>
     <div class="input-group">
-      <span class="input-group-btn">
+      <span class="input-group-btn d-none d-sm-inline">
         <a class="btn btn-info" href="{% url 'schedule:schedules_by_date' prev_week %}" type="button">
           <i class="fa fa-fast-backward" aria-hidden="true"></i>
         </a>
@@ -30,7 +30,7 @@
           <i class="fa fa-arrow-right" aria-hidden="true"></i>
         </a>
       </span>
-      <span class="input-group-btn">
+      <span class="input-group-btn d-none d-sm-inline">
         <a href="{% url 'schedule:schedules_by_date' next_week %}" class="btn btn-info" type="button">
           <i class="fa fa-fast-forward" aria-hidden="true"></i>
         </a>
@@ -126,6 +126,6 @@ $.ajaxSetup({
   };
 
 
-filterInput.keyup(_.debounce(filterCards, 500));
+filterInput.keyup(_.debounce(filterCards, 400));
 </script>
 {% endblock %}
