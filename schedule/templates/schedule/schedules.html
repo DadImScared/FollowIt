@@ -67,7 +67,7 @@
                   <button id="show-{{ episode.show.id }}" class="follow-btn btn btn-primary">Follow</button>
                 {% endif %}
               {% else %}
-                <button id="show-{{ episode.show.id }}" class="follow-btn btn btn-primary">Follow</button>
+                <a href="{% url 'login' %}?next=/schedule/" class="btn btn-primary" role="button" aria-pressed="true">Follow</a>
               {% endif %}
               <a href="{% url 'shows:show' episode.show.id %}" class="btn btn-info">View show</a>
             </div>
