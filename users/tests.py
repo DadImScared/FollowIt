@@ -4,9 +4,9 @@ import random
 from django.test import TestCase, override_settings
 from django.urls import reverse
 from django.core import mail
-from .models import Person, FollowedShows, Profile
+from .models import Person, FollowedShows, Profile, UnwatchedEpisode, User
 from pytv import Schedule
-from email_users import mail_users
+from email_users import mail_users, save_episodes
 # Create your tests here.
 # show_name=episode['show']['name'],
 #             network=episode['show']['network']['name'],
@@ -21,13 +21,13 @@ def create_shows(user, schedule=Schedule()):
     for episode in schedule.episodes:
         FollowedShows.objects.get_or_create(
             user=user,
-            show_id=episode['show']['id'],
+            show_id=episode.show.id,
             defaults={
-                'show_name': episode['show']['name'],
-                'network': episode['show']['network']['name'],
-                'air_time': episode['airtime'] or '00:00',
-                'air_days': ','.join(episode['show']['schedule']['days']).lower(),
-                'summary': episode['summary'] or 'no summary'
+                'show_name': episode.show.name,
+                'network': episode.show.network['name'],
+                'air_time': episode.airtime or '00:00',
+                'air_days': ','.join(episode.show.schedule['days']).lower(),
+                'summary': episode.summary or 'no summary'
             }
         )
 
@@ -63,14 +63,20 @@ class FollowedShowsTests(TestCase):
         self.schedule = Schedule(date=time.strftime('%Y-%m-%d'))
         create_shows(self.user, self.schedule)
         create_shows(self.user2, self.schedule)
-        self.episode_list = [episode['show']['id'] for episode in self.schedule.episodes]
+        self.episode_list = [episode.show.id for episode in self.schedule.episodes]
         self.shows = FollowedShows.objects.filter(show_id__in=self.episode_list).order_by('-air_time')
 
     @override_settings(EMAIL_BACKEND='django.core.mail.backends.locmem.EmailBackend')
     def test_email_users_followed_shows_on_specific_day(self):
         mail_users()
         self.assertEqual(2, len(mail.outbox))
+        for show in FollowedShows.objects.filter(user_id=self.user.id):
+            self.assertTrue(show.unwatchedepisode_set.all().count() > 0)
 
+    def test_save_unwatched_episodes(self):
+        save_episodes(self.schedule.episodes)
+        for show in FollowedShows.objects.filter(user_id=self.user.id):
+            self.assertTrue(show.unwatchedepisode_set.all().count() > 0)
 
 # TEST BELOW NEEDS TO BE REFACTORED
 # class FollowedShowsViewTests(TestCase):

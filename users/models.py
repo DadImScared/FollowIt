@@ -38,3 +38,19 @@ class FollowedShows(models.Model):
     air_days = models.TextField()
     summary = models.TextField()
     network = models.CharField(max_length=255)
+
+
+class UnwatchedEpisode(models.Model):
+    followed_show = models.ForeignKey(FollowedShows, on_delete=models.CASCADE)
+    watched = models.BooleanField(default=False)
+    episode_id = models.IntegerField()
+    episode_name = models.TextField()
+    season = models.IntegerField()
+    episode_number = models.IntegerField()
+    air_time = models.TimeField()
+    air_date = models.DateField()
+    air_stamp = models.DateTimeField()
+    summary = models.TextField()
+
+    class Meta:
+        ordering = ["season", "episode_number"]
