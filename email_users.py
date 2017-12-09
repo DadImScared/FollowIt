@@ -70,3 +70,6 @@ def mail_users():
             )
         )
     save_episodes(schedule.episodes)
+
+if __name__ == '__main__':
+    mail_users()
