@@ -1,7 +1,7 @@
 
 import datetime
 import random
-from django.test import TestCase, override_settings
+from django.test import TestCase, override_settings, TransactionTestCase
 from django.urls import reverse
 from django.core import mail
 from .models import Person, FollowedShows, Profile, UnwatchedEpisode, User
@@ -51,7 +51,7 @@ class PersonTests(TestCase):
         self.assertTrue(person.is_following(show.show_id))
 
 
-class FollowedShowsTests(TestCase):
+class FollowedShowsTests(TransactionTestCase):
     def setUp(self):
         self.user = Person.objects.create_user(username='foo', password='bar', email='foo@test.com')
         self.user.save()
@@ -68,15 +68,37 @@ class FollowedShowsTests(TestCase):
 
     @override_settings(EMAIL_BACKEND='django.core.mail.backends.locmem.EmailBackend')
     def test_email_users_followed_shows_on_specific_day(self):
+        """Users following shows should receive an email with the shows"""
         mail_users()
         self.assertEqual(2, len(mail.outbox))
         for show in FollowedShows.objects.filter(user_id=self.user.id):
             self.assertTrue(show.unwatchedepisode_set.all().count() > 0)
 
     def test_save_unwatched_episodes(self):
+        """Followed shows' episodes should be saved to an unwatched list"""
         save_episodes(self.schedule.episodes)
         for show in FollowedShows.objects.filter(user_id=self.user.id):
             self.assertTrue(show.unwatchedepisode_set.all().count() > 0)
+
+    def test_save_repeat_unwatched_episodes_should_not_be(self):
+        """Repeat unwatched episodes should not be saved"""
+        episode = self.schedule.episodes[0]
+        all_episodes = self.schedule.episodes
+        followed_show = FollowedShows.objects.get(user=self.user, show_id=episode.show.id)
+        UnwatchedEpisode(
+            followed_show=followed_show,
+            episode_id=episode.id,
+            episode_name=episode.name,
+            season=episode.season,
+            episode_number=episode.number or 0,
+            air_date=episode.airdate,
+            air_time=episode.airtime,
+            air_stamp=episode.airstamp,
+            summary=episode.summary or "no summary"
+        ).save()
+        save_episodes(self.schedule.episodes)
+        # make sure all episodes are saved to both users unwatched episodes despite the integrity error in bulk_create
+        self.assertEqual(len(all_episodes) * 2, len(UnwatchedEpisode.objects.all()))
 
 # TEST BELOW NEEDS TO BE REFACTORED
 # class FollowedShowsViewTests(TestCase):

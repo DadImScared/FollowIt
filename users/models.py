@@ -54,3 +54,4 @@ class UnwatchedEpisode(models.Model):
 
     class Meta:
         ordering = ["season", "episode_number"]
+        unique_together = (('followed_show', 'episode_id'),)

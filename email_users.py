@@ -1,5 +1,6 @@
 
 import django
+from django.db import IntegrityError
 from django.core import mail
 from pytv import Schedule
 
@@ -39,9 +40,16 @@ def save_episodes(episode_list):
                     summary=episode.summary or "no summary"
                 )
             )
-    UnwatchedEpisode.objects.bulk_create([
-        item for item in unwatched_episodes
-    ])
+    try:
+        UnwatchedEpisode.objects.bulk_create([
+            item for item in unwatched_episodes
+        ])
+    except IntegrityError:
+        for item in unwatched_episodes:
+            try:
+                item.save()
+            except IntegrityError:
+                continue
 
 
 def mail_users():
